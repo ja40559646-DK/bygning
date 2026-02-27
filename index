@@ -1,0 +1,1 @@
+```git remote set-url origin https://github.com/ja40559646-DK/bygning.git 2>/dev/null || git remote add origin https://github.com/ja40559646-DK/bygning.git```
