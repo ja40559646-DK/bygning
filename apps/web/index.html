@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="da">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bygning – Fase 1 UI</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Bygning</h1>
+      <p class="subtitle">Fase 1 – kunde- og projektoprettelse med OTP-verifikation</p>
+
+      <section class="card">
+        <h2>Driftsstatus (prototype)</h2>
+        <div class="status-grid">
+          <div><strong>API:</strong> <span id="api-status">ukendt</span></div>
+          <div><strong>Sidst opdateret:</strong> <span id="api-status-updated">-</span></div>
+        </div>
+        <button id="check-health-btn" type="button">Tjek API-status</button>
+      </section>
+
+      <section class="card">
+        <h2>1) Opret projekt</h2>
+        <form id="intake-form">
+          <div class="grid">
+            <label>Kundenavn<input name="customerName" required /></label>
+            <label>Projektnavn<input name="projectName" required /></label>
+            <label>Kunde email<input name="email" type="email" required /></label>
+            <label>Telefon<input name="phone" required /></label>
+            <label>Vej<input name="street" required /></label>
+            <label>Nr<input name="number" required /></label>
+            <label>Postnr<input name="postalCode" required /></label>
+            <label>By<input name="city" required /></label>
+          </div>
+          <label class="checkbox">
+            <input type="checkbox" name="sameAddress" checked />
+            Projektadresse er identisk med kundeadresse
+          </label>
+          <button type="submit">Opret projekt</button>
+        </form>
+        <p class="tip">Tip: Start altid med at oprette projektet først.</p>
+        <pre id="intake-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>2) Bed om verificeringskode</h2>
+        <form id="request-code-form">
+          <label>Email<input name="email" type="email" required /></label>
+          <button type="submit">Send kode</button>
+        </form>
+        <p class="tip">Tip: Koden vises i server-log i denne prototype.</p>
+        <pre id="request-code-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>3) Verificér kode</h2>
+        <form id="verify-form">
+          <label>Email<input name="email" type="email" required /></label>
+          <label>Kode<input name="code" required /></label>
+          <button type="submit">Verificér</button>
+        </form>
+        <p class="tip">Tip: Kopiér koden fra loggen og verificér her.</p>
+        <pre id="verify-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>4) Projekter i nuværende session</h2>
+        <button id="list-projects-btn" type="button">Hent projekter i session</button>
+        <pre id="projects-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>5) Arbejdsområde (visuel preview)</h2>
+        <p>Klik i feltet for at sætte punkter. Når du har mindst 3 punkter, kan areal beregnes.</p>
+        <canvas id="work-area-canvas" width="900" height="280"></canvas>
+        <div class="row">
+          <button id="preview-work-area-btn" type="button">Beregn arbejdsområde</button>
+          <button id="reset-work-area-btn" type="button" class="secondary">Nulstil punkter</button>
+        </div>
+        <pre id="work-area-result"></pre>
+        <div class="grid">
+          <label>Objekttype
+            <select id="site-object-type">
+              <option value="hus">Hus</option>
+              <option value="anneks">Anneks</option>
+              <option value="tilbygning">Tilbygning</option>
+              <option value="skur">Skur</option>
+              <option value="carport">Carport</option>
+              <option value="terrasse">Terrasse</option>
+            </select>
+          </label>
+          <label>Objektnavn<input id="site-object-name" value="Objekt 1" /></label>
+        </div>
+        <div class="row">
+          <button id="save-site-object-btn" type="button">Gem objekt på grunden</button>
+          <button id="list-site-objects-btn" type="button" class="secondary">Vis objekter</button>
+        </div>
+        <pre id="site-objects-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>6) Materialedatabase + lastberegning</h2>
+        <div class="row">
+          <button id="list-materials-btn" type="button">Vis materialer</button>
+          <button id="list-load-combinations-btn" type="button" class="secondary">Vis ULS/SLS</button>
+        </div>
+        <form id="load-calc-form">
+          <div class="grid">
+            <label>Materiale-id<input id="material-id" value="M006" required /></label>
+            <label>Areal m²<input id="area-m2" type="number" step="0.1" value="20" required /></label>
+            <label>Bredde m<input id="width-m" type="number" step="0.1" value="0.3" required /></label>
+            <label>Influensareal m²<input id="influence-area-m2" type="number" step="0.1" value="2" required /></label>
+            <label>Variabel last kN<input id="variable-load-kn" type="number" step="0.1" value="2" required /></label>
+            <label>Kombinationstype
+              <select id="combination-type">
+                <option value="ulsPersistentTransient">ULS persistent/transient</option>
+                <option value="slsCharacteristic">SLS characteristic</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit">Beregn samlet last</button>
+        </form>
+        <pre id="materials-result"></pre>
+        <pre id="load-calculation-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>7) Komponentopbygning (væg/gulv/tag)</h2>
+        <form id="component-form">
+          <div class="grid">
+            <label>Komponent
+              <select id="component-type">
+                <option value="wall">Væg</option>
+                <option value="floor">Gulv</option>
+                <option value="roof">Tag</option>
+              </select>
+            </label>
+            <label>Materiale-id<input id="component-material-id" value="M001" required /></label>
+            <label>Komponent areal m²<input id="component-area-m2" type="number" step="0.1" value="25" required /></label>
+            <label>Variabel last kN<input id="component-variable-load-kn" type="number" step="0.1" value="2" required /></label>
+          </div>
+          <div class="row">
+            <button id="list-components-btn" type="button">Vis komponenter</button>
+            <button id="suggest-component-materials-btn" type="button" class="secondary">Foreslå materialer</button>
+            <button type="submit">Beregn komponent</button>
+          </div>
+        </form>
+        <pre id="components-result"></pre>
+        <pre id="component-estimate-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>8) Sikkert komponent-sandbox (udskift lag uden sideeffekt)</h2>
+        <p>Brug sandbox til at bytte lag/materialer i en komponent uden at påvirke andet end den beregnede last i dette draft.</p>
+        <form id="sandbox-form">
+          <div class="grid">
+            <label>Komponent
+              <select id="sandbox-component-type">
+                <option value="wall">Væg</option>
+                <option value="floor">Gulv</option>
+                <option value="roof">Tag</option>
+              </select>
+            </label>
+            <label>Areal m²<input id="sandbox-area-m2" type="number" step="0.1" value="30" required /></label>
+            <label>Variabel last kN<input id="sandbox-variable-load-kn" type="number" step="0.1" value="2" required /></label>
+          </div>
+          <div class="row">
+            <button id="sandbox-create-btn" type="button">Opret sandbox draft</button>
+            <button id="sandbox-calc-btn" type="button" class="secondary">Beregn sandbox</button>
+          </div>
+          <div class="row">
+            <button id="sandbox-list-presets-btn" type="button">Vis presets</button>
+            <button id="sandbox-apply-preset-btn" type="button" class="secondary">Anvend preset</button>
+          </div>
+          <label>Preset-id<input id="sandbox-preset-id" value="wall-standard-tegl" /></label>
+          <div class="grid">
+            <label>Lag-id<input id="sandbox-layer-id" value="inner" /></label>
+            <label>Materiale-id<input id="sandbox-material-id" value="M004" /></label>
+            <label>Lag-andel (0-1)<input id="sandbox-layer-ratio" type="number" step="0.1" value="0.5" /></label>
+          </div>
+          <div class="row">
+            <button id="sandbox-upsert-layer-btn" type="button">Tilføj/opdatér lag</button>
+            <button id="sandbox-remove-layer-btn" type="button" class="secondary">Fjern lag</button>
+            <button id="sandbox-rollback-btn" type="button" class="secondary">Rul tilbage</button>
+          </div>
+        </form>
+        <pre id="sandbox-draft-result"></pre>
+        <pre id="sandbox-estimate-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>9) Sandbox sammenligning (A/B)</h2>
+        <p>Sammenlign to drafts for at se forskel i permanent last og kombineret last.</p>
+        <div class="row">
+          <button id="sandbox-compare-btn" type="button">Sammenlign aktuelle drafts</button>
+        </div>
+        <pre id="sandbox-compare-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>10) Fase 4 – facade/gavl workflow</h2>
+        <form id="facade-form">
+          <div class="grid">
+            <label>Længde m<input id="facade-length" type="number" step="0.1" value="12" required /></label>
+            <label>Bredde m<input id="facade-width" type="number" step="0.1" value="8" required /></label>
+            <label>Væghøjde m<input id="facade-wall-height" type="number" step="0.1" value="2.8" required /></label>
+            <label>Gavlhøjde m<input id="facade-gable-height" type="number" step="0.1" value="1.6" required /></label>
+          </div>
+          <button type="submit">1) Beregn facade-envelope</button>
+        </form>
+
+        <div class="grid">
+          <label>Første kant-indeks<input id="gable-first-edge" type="number" value="0" min="0" step="1" /></label>
+          <label>Anden kant-indeks<input id="gable-second-edge" type="number" value="2" min="0" step="1" /></label>
+          <label>Max afvigelse °<input id="gable-max-deviation" type="number" value="5" min="0.1" step="0.1" /></label>
+          <label>Rygningshøjde m<input id="gable-ridge-height" type="number" value="4.4" min="0.1" step="0.1" /></label>
+        </div>
+        <div class="row">
+          <button id="gable-select-btn" type="button">2) Vælg gavlretning</button>
+          <button id="gable-profile-btn" type="button">3) Generér gavlprofil</button>
+          <button id="facade-envelope-from-selection-btn" type="button">4) Afled envelope fra gavlretning</button>
+          <button id="facade-couple-sandbox-btn" type="button">5) Kobl med sandbox (væg/tag)</button>
+        </div>
+
+        <pre id="facade-result"></pre>
+        <pre id="gable-selection-result"></pre>
+        <pre id="gable-profile-result"></pre>
+        <pre id="facade-envelope-selection-result"></pre>
+        <pre id="facade-coupling-result"></pre>
+      </section>
+
+
+      <section class="card">
+        <h2>11) Fase 5 – Lastlinjer</h2>
+        <p>Indtegn og test lastlinjer i snit. Workflowet viser projektion gennem bygningsdybde og konfliktkontrol.</p>
+        <div class="grid">
+          <label>Bygningsdybde m<input id="load-lines-depth" type="number" step="0.1" value="8" required /></label>
+          <label>Linje A (x1,y1;x2,y2)<input id="load-line-a" value="0,0;10,0" /></label>
+          <label>Linje B (x1,y1;x2,y2)<input id="load-line-b" value="0,4;10,4" /></label>
+        </div>
+        <div class="row">
+          <button id="load-lines-project-btn" type="button">1) Projekter lastlinjer</button>
+          <button id="load-lines-conflicts-btn" type="button">2) Tjek konflikter</button>
+          <button id="load-lines-preview-btn" type="button">3) Kør samlet workflow</button>
+        </div>
+        <pre id="load-lines-project-result"></pre>
+        <pre id="load-lines-conflicts-result"></pre>
+        <pre id="load-lines-workflow-result"></pre>
+      </section>
+
+
+
+      <section class="card">
+        <h2>12) Fase 6 – Beregningsmotor</h2>
+        <p>Konverter areallaster til linje- og punktlaster samt ULS/SLS pr. retning.</p>
+        <div class="grid">
+          <label>Retning
+            <select id="engine-direction">
+              <option value="z-">z-</option>
+              <option value="z+">z+</option>
+              <option value="x">x</option>
+              <option value="y">y</option>
+            </select>
+          </label>
+          <label>Areal m²<input id="engine-area" type="number" step="0.1" value="20" /></label>
+          <label>Areal-last kN/m²<input id="engine-load-per-m2" type="number" step="0.1" value="1.2" /></label>
+          <label>Tributær bredde m<input id="engine-tributary-width" type="number" step="0.1" value="0.3" /></label>
+          <label>Influensareal m²<input id="engine-influence-area" type="number" step="0.1" value="2" /></label>
+          <label>Variabel last kN<input id="engine-variable-load" type="number" step="0.1" value="3" /></label>
+        </div>
+        <div class="row">
+          <button id="engine-list-profiles-btn" type="button">Vis profiler</button>
+          <button id="engine-calculate-btn" type="button">Kør beregningsmotor</button>
+        </div>
+        <pre id="engine-profiles-result"></pre>
+        <pre id="engine-calc-result"></pre>
+      </section>
+
+
+
+      <section class="card">
+        <h2>13) Fase 7 – Drift & monitorering</h2>
+        <div class="grid">
+          <label>Incident titel<input id="ops-incident-title" value="API latency" /></label>
+          <label>Severity
+            <select id="ops-incident-severity">
+              <option value="low">low</option>
+              <option value="medium" selected>medium</option>
+              <option value="high">high</option>
+              <option value="critical">critical</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <button id="ops-create-incident-btn" type="button">Opret incident</button>
+          <button id="ops-close-incident-btn" type="button">Luk sidste incident</button>
+          <button id="ops-summary-btn" type="button">Beregn go-live summary</button>
+          <button id="ops-drill-btn" type="button">Kør drill readiness</button>
+        </div>
+        <pre id="ops-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>14) Fase 8 – Release governance</h2>
+        <div class="grid">
+          <label>Version<input id="release-version" value="1.0.0" /></label>
+          <label>Miljø<input id="release-environment" value="staging" /></label>
+          <label>Audience
+            <select id="release-audience">
+              <option value="internal">internal</option>
+              <option value="customer">customer</option>
+            </select>
+          </label>
+        </div>
+        <div class="row">
+          <button id="release-create-btn" type="button">Opret release candidate</button>
+          <button id="release-approve-btn" type="button">Godkend technical+business</button>
+          <button id="release-export-btn" type="button">Eksportér release rapport</button>
+        </div>
+        <pre id="release-result"></pre>
+      </section>
+
+
+
+      <section class="card">
+        <h2>15) Fase 9+10 – Klar til afprøvning</h2>
+        <p>Hent live status og en konkret guide til hvordan du prøver løs lokalt.</p>
+        <div class="row">
+          <button id="meta-status-btn" type="button">Vis fase-status (0-10)</button>
+          <button id="meta-guide-btn" type="button">Vis “prøv nu” guide</button>
+        </div>
+        <pre id="meta-status-result"></pre>
+        <pre id="meta-guide-result"></pre>
+      </section>
+
+
+
+      <section class="card">
+        <h2>16) Fase 11–13 – Feedback, prioritering og KPI</h2>
+        <div class="grid">
+          <label>Feedback titel<input id="feedback-title" value="Forkert beregning vist" /></label>
+          <label>Kategori
+            <select id="feedback-category">
+              <option value="ux">ux</option>
+              <option value="calculation">calculation</option>
+              <option value="performance">performance</option>
+              <option value="error" selected>error</option>
+            </select>
+          </label>
+          <label>Severity (1-5)<input id="feedback-severity" type="number" min="1" max="5" value="4" /></label>
+        </div>
+        <div class="row">
+          <button id="feedback-submit-btn" type="button">1) Submit feedback</button>
+          <button id="feedback-priorities-btn" type="button">2) Vis prioritering</button>
+          <button id="feedback-kpis-btn" type="button">3) Beregn KPI</button>
+        </div>
+        <pre id="feedback-result"></pre>
+      </section>
+
+
+
+      <section class="card">
+        <h2>17) Fase 14–15 – Quality snapshots og pilot trends</h2>
+        <div class="grid">
+          <label>Snapshot navn<input id="quality-snapshot-name" value="candidate-a" /></label>
+          <label>Test passrate<input id="quality-test-rate" type="number" step="0.01" value="1" /></label>
+          <label>Lint passrate<input id="quality-lint-rate" type="number" step="0.01" value="1" /></label>
+          <label>Security passrate<input id="quality-security-rate" type="number" step="0.01" value="1" /></label>
+          <label>Avg response ms<input id="quality-response-ms" type="number" step="1" value="120" /></label>
+        </div>
+        <div class="row">
+          <button id="quality-create-btn" type="button">1) Opret snapshot</button>
+          <button id="quality-compare-btn" type="button">2) Sammenlign sidste to</button>
+          <button id="pilot-trend-btn" type="button">3) Vis trend</button>
+          <button id="pilot-alert-btn" type="button">4) Kør alerts</button>
+        </div>
+        <pre id="quality-result"></pre>
+      </section>
+
+
+
+      <section class="card">
+        <h2>18) Fase 16 – Reference cases</h2>
+        <div class="grid">
+          <label>Case navn<input id="phase16-case-name" value="Tag case" /></label>
+          <label>Kategori<input id="phase16-case-category" value="roof" /></label>
+          <label>Expected resultat<input id="phase16-case-expected" type="number" step="0.1" value="12.5" /></label>
+          <label>Actual resultat<input id="phase16-case-actual" type="number" step="0.1" value="12.5" /></label>
+        </div>
+        <div class="row">
+          <button id="phase16-create-btn" type="button">1) Opret reference case</button>
+          <button id="phase16-validate-btn" type="button">2) Validér case</button>
+        </div>
+        <pre id="phase16-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>19) Fase 17 – Gate review</h2>
+        <div class="grid">
+          <label>Gate id<input id="phase17-gate-id" value="G9" /></label>
+          <label><input id="phase17-tests" type="checkbox" checked /> Tests OK</label>
+          <label><input id="phase17-security" type="checkbox" checked /> Security OK</label>
+          <label><input id="phase17-lint" type="checkbox" checked /> Lint OK</label>
+          <label><input id="phase17-docs" type="checkbox" /> Docs OK</label>
+        </div>
+        <button id="phase17-review-btn" type="button">Kør gate review</button>
+        <pre id="phase17-result"></pre>
+      </section>
+
+      <section class="card">
+        <h2>20) Fase 18 – Rollout plan</h2>
+        <div class="grid">
+          <label>Version<input id="phase18-version" value="2.0.0" /></label>
+          <label>Miljø<input id="phase18-environment" value="staging" /></label>
+          <label>Steps (komma-separeret)<input id="phase18-steps" value="Backup, Deploy, Verify" /></label>
+          <label><input id="phase18-backup" type="checkbox" checked /> Backup OK</label>
+          <label><input id="phase18-rollback" type="checkbox" checked /> Rollback OK</label>
+          <label><input id="phase18-monitoring" type="checkbox" checked /> Monitoring OK</label>
+        </div>
+        <div class="row">
+          <button id="phase18-plan-btn" type="button">1) Opret rollout plan</button>
+          <button id="phase18-readiness-btn" type="button">2) Tjek rollout readiness</button>
+        </div>
+        <pre id="phase18-result"></pre>
+      </section>
+
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
