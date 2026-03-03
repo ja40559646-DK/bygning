@@ -127,6 +127,27 @@ Når vi har merged projektfilerne til `main`, vil scriptet også findes der.
 
 ---
 
+
+## Metode C – Fuld download/import (bundle-fil)
+Hvis du vil tage hele projektet med historik som en fil og importere det i GitHub:
+
+```bash
+bash scripts/create-github-import-bundle.sh
+```
+
+Det genererer en `.bundle`-fil i `export/`. Importen er:
+
+```bash
+mkdir import-bygning && cd import-bygning
+git clone ../bygning/export/<filnavn>.bundle bygning
+cd bygning
+git remote add origin https://github.com/<din-bruger>/<repo>.git
+git push -u origin --all
+git push origin --tags
+```
+
+Tip: brug filen `*.manifest.txt` i `export/` som huskeseddel.
+
 ## 60-sekunders tjek (hurtig version)
 - [ ] GitHub Desktop er installeret
 - [ ] Repo `bygning` er åbnet i GitHub Desktop

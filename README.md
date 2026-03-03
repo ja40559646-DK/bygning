@@ -87,3 +87,17 @@ bash scripts/check-github-setup.sh --local-only
 - Små, afsluttede step med tydelige acceptkriterier.
 - Kvalitetsgates før næste fase.
 - Beregningsmodeller dokumenteres med kildehenvisninger (BR18/DS/EN/NA) før produktion.
+
+## Fuldt download til GitHub-import
+Hvis du vil have hele projektet med historik som en fil, kan du lave en eksport-pakke:
+
+```bash
+bash scripts/create-github-import-bundle.sh
+```
+
+Det laver i mappen `export/`:
+- `*.bundle` (fuld git-historik + branches, bedst til GitHub-import)
+- `*.tar.gz` (snapshot af nuværende kode)
+- `*.manifest.txt` (trin-for-trin importguide)
+
+For fuld import til GitHub: clone fra `.bundle` og push til dit GitHub-repo (se `manifest` eller `GITHUB_SETUP.md`).
