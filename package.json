@@ -1,0 +1,13 @@
+{
+  "name": "bygning",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "node scripts/lint.mjs",
+    "test": "node --test",
+    "ci": "npm run security && npm run lint && npm run test",
+    "security": "node scripts/security-check.mjs",
+    "start:api": "node apps/api/src/server.js"
+  }
+}
